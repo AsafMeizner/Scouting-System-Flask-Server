@@ -7,36 +7,52 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-def draw_circles_on_image(team_number, coordinates, color = (0, 134, 64)):
+def DrawShootingPoses(team_number, coordinates, round_number, color):
+    # all-time image
     dirname = os.path.dirname(__file__)
-    image_path = "teams/" + str(team_number) + ".png"
+    image_path = "DCMP/ShootingPoses/" + str(team_number) + "/0.png"
     image_path = os.path.join(dirname, image_path)
 
     if not os.path.exists(image_path):
-        reset_pic(team_number)
+        reset_pic(team_number, 0) # if the image does not exist, create empty image
 
-    # Open the image
-    img = Image.open(image_path)
+    img = Image.open(image_path) # Open the image
 
-    # Create a drawing object
-    draw = ImageDraw.Draw(img)
+    draw = ImageDraw.Draw(img) # Create a drawing object
 
-    # Set the circle color
-    circle_color = color  # Green color
+    circle_color = color # Set the circle color
 
-    # Draw a 5-pixel green circle on each coordinate
     for coord in coordinates:
         x, y = coord
-        draw.ellipse([x - 15, y - 15, x + 15, y + 15], fill=circle_color, outline=circle_color)
+        draw.ellipse([x - 15, y - 15, x + 15, y + 15], fill=circle_color, outline=circle_color) # Draw a 5-pixel green circle on each coordinate
 
-    # Save the modified image (overwriting the input image)
-    img.save(image_path)
+    img.save(image_path) # Save the modified image (overwriting the input image)
+
+
+    # round specific image ========================================================================================================
+    image_path = "DCMP/ShootingPoses/" + str(team_number) + "/" + str(round_number) + ".png"
+    image_path = os.path.join(dirname, image_path)
+
+    if not os.path.exists(image_path):
+        reset_pic(team_number, round_number) # if the image does not exist, create empty image
+    
+    img = Image.open(image_path) # Open the image
+
+    draw = ImageDraw.Draw(img) # Create a drawing object
+
+    circle_color = color # Set the circle color
+
+    for coord in coordinates:
+        x, y = coord
+        draw.ellipse([x - 15, y - 15, x + 15, y + 15], fill=circle_color, outline=circle_color) # Draw a 5-pixel green circle on each coordinate
+
+    img.save(image_path) # Save the modified image (overwriting the input image)
 
     print("image " + str(team_number) + " drawn successfully")
 
-def draw_circles_on_pose_image(team_number, coordinates):
+def DrawStartingPoses(team_number, coordinates):
     dirname = os.path.dirname(__file__)
-    image_path = "StartingPoses/" + str(team_number) + ".png"
+    image_path = "DCMP/StartingPoses/" + str(team_number) + ".png"
     image_path = os.path.join(dirname, image_path)
 
     if not os.path.exists(image_path):
@@ -61,11 +77,9 @@ def draw_circles_on_pose_image(team_number, coordinates):
 
     print("pose image " + str(team_number) + " drawn successfully")
 
-
-def reset_pic(team_number):
-    # replace image with replacement_image_path
+def reset_pic(team_number, round_number):
     dirname = os.path.dirname(__file__)
-    image_path = "teams/" + str(team_number) + ".png"
+    image_path = "DCMP/ShootingPoses/" + str(team_number) + "/" + str(round_number) + ".png"
     image_path = os.path.join(dirname, image_path)
 
     replacement_image_path = "emptyField.png"
@@ -75,7 +89,7 @@ def reset_pic(team_number):
     img.save(image_path)
 
     # replace pose image with replacement_image_path
-    pose_image_path = "StartingPoses/" + str(team_number) + ".png"
+    pose_image_path = "DCMP/StartingPoses/" + str(team_number) + ".png"
     pose_image_path = os.path.join(dirname, pose_image_path)
 
     pose_replacement_image_path = "emptyField.png"
@@ -86,29 +100,20 @@ def reset_pic(team_number):
 
     print("images for team " + str(team_number) + " reset successfully")
 
-
 @app.route('/update_image', methods=['POST'])
 def update_image():
     data = request.get_json()
 
     team_number = data['team_number']
 
+    round_number = data['round_number']
+
     ScoreCoordinates = data.get('ScoreCoordinates', [])
-    draw_circles_on_image(team_number, ScoreCoordinates, (0, 134, 64))
+    DrawShootingPoses(team_number, ScoreCoordinates, round_number, (0, 134, 64))
     MissCoordinates = data.get('MissCoordinates', [])
-    draw_circles_on_image(team_number, MissCoordinates, (255, 217, 8))
+    DrawShootingPoses(team_number, MissCoordinates, round_number, (255, 217, 8))
     PoseCoordinates = data.get('PoseCoordinates', [])
-    draw_circles_on_pose_image(team_number, PoseCoordinates)
-
-    return jsonify({"message": "Request processed successfully"})
-
-@app.route('/reset_image', methods=['POST'])
-def reset_image():
-    data = request.get_json()
-
-    team_number = data['team_number']
-
-    reset_pic(team_number)
+    DrawStartingPoses(team_number, PoseCoordinates)
 
     return jsonify({"message": "Request processed successfully"})
 

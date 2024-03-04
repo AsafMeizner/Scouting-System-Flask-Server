@@ -85,15 +85,17 @@ def reset_pic(team_number, round_number):
     shooting_poses_dir = os.path.join(base_dir, "DCMP/ShootingPoses", str(team_number))
     os.makedirs(shooting_poses_dir, exist_ok=True)
 
-    # Create the folder for StartingPoses if it doesn't exist
-    starting_poses_dir = os.path.join(base_dir, "DCMP/StartingPoses")
-    os.makedirs(starting_poses_dir, exist_ok=True)
-
     # Construct the image path for ShootingPoses
     image_path = os.path.join(shooting_poses_dir, str(round_number) + ".png")
 
+    # Create the parent directories if they don't exist
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+
     # Construct the image path for StartingPoses
-    pose_image_path = os.path.join(starting_poses_dir, str(team_number) + ".png")
+    pose_image_path = os.path.join(base_dir, "DCMP/StartingPoses", str(team_number) + ".png")
+
+    # Create the parent directories if they don't exist
+    os.makedirs(os.path.dirname(pose_image_path), exist_ok=True)
 
     # Load replacement image
     replacement_image_path = os.path.join(base_dir, "emptyField.png")

@@ -78,27 +78,35 @@ def DrawStartingPoses(team_number, coordinates):
     print("pose image " + str(team_number) + " drawn successfully")
 
 def reset_pic(team_number, round_number):
-    dirname = os.path.dirname(__file__)
-    image_path = "DCMP/ShootingPoses/" + str(team_number) + "/" + str(round_number) + ".png"
-    image_path = os.path.join(dirname, image_path)
+    # Define the base directory
+    base_dir = os.path.dirname(__file__)
 
-    replacement_image_path = "emptyField.png"
-    replacement_image_path = os.path.join(dirname, replacement_image_path)
+    # Create the folder for ShootingPoses if it doesn't exist
+    shooting_poses_dir = os.path.join(base_dir, "DCMP/ShootingPoses", str(team_number))
+    os.makedirs(shooting_poses_dir, exist_ok=True)
+
+    # Create the folder for StartingPoses if it doesn't exist
+    starting_poses_dir = os.path.join(base_dir, "DCMP/StartingPoses")
+    os.makedirs(starting_poses_dir, exist_ok=True)
+
+    # Construct the image path for ShootingPoses
+    image_path = os.path.join(shooting_poses_dir, str(round_number) + ".png")
+
+    # Construct the image path for StartingPoses
+    pose_image_path = os.path.join(starting_poses_dir, str(team_number) + ".png")
+
+    # Load replacement image
+    replacement_image_path = os.path.join(base_dir, "emptyField.png")
     img = Image.open(replacement_image_path)
 
+    # Save the replacement image for ShootingPoses
     img.save(image_path)
 
-    # replace pose image with replacement_image_path
-    pose_image_path = "DCMP/StartingPoses/" + str(team_number) + ".png"
-    pose_image_path = os.path.join(dirname, pose_image_path)
-
-    pose_replacement_image_path = "emptyField.png"
-    pose_replacement_image_path = os.path.join(dirname, pose_replacement_image_path)
+    # Save the replacement image for StartingPoses
     pose_img = Image.open(replacement_image_path)
-
     pose_img.save(pose_image_path)
 
-    print("images for team " + str(team_number) + " reset successfully")
+    print("Images for team " + str(team_number) + " reset successfully")
 
 @app.route('/update_image', methods=['POST'])
 def update_image():

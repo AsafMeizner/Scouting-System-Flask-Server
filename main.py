@@ -12,6 +12,9 @@ def draw_circles_on_image(team_number, coordinates, color = (0, 134, 64)):
     image_path = "teams/" + str(team_number) + ".png"
     image_path = os.path.join(dirname, image_path)
 
+    if not os.path.exists(image_path):
+        reset_pic(team_number)
+
     # Open the image
     img = Image.open(image_path)
 
@@ -35,6 +38,9 @@ def draw_circles_on_pose_image(team_number, coordinates):
     dirname = os.path.dirname(__file__)
     image_path = "StartingPoses/" + str(team_number) + ".png"
     image_path = os.path.join(dirname, image_path)
+
+    if not os.path.exists(image_path):
+        reset_pic(team_number)
 
     # Open the image
     img = Image.open(image_path)
@@ -85,21 +91,26 @@ def reset_pic(team_number):
 def update_image():
     data = request.get_json()
 
-    action = data['action']
     team_number = data['team_number']
 
-    if action == 'edit':
-        ScoreCoordinates = data.get('ScoreCoordinates', [])
-        draw_circles_on_image(team_number, ScoreCoordinates, (0, 134, 64))
-        MissCoordinates = data.get('MissCoordinates', [])
-        draw_circles_on_image(team_number, MissCoordinates, (255, 217, 8))
-        PoseCoordinates = data.get('PoseCoordinates', [])
-        draw_circles_on_pose_image(team_number, PoseCoordinates)
-    elif action == 'reset':
-        reset_pic(team_number)
+    ScoreCoordinates = data.get('ScoreCoordinates', [])
+    draw_circles_on_image(team_number, ScoreCoordinates, (0, 134, 64))
+    MissCoordinates = data.get('MissCoordinates', [])
+    draw_circles_on_image(team_number, MissCoordinates, (255, 217, 8))
+    PoseCoordinates = data.get('PoseCoordinates', [])
+    draw_circles_on_pose_image(team_number, PoseCoordinates)
 
     return jsonify({"message": "Request processed successfully"})
 
+@app.route('/reset_image', methods=['POST'])
+def reset_image():
+    data = request.get_json()
+
+    team_number = data['team_number']
+
+    reset_pic(team_number)
+
+    return jsonify({"message": "Request processed successfully"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6969)
